@@ -1,0 +1,39 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        java-version: '17'
+
+    - name: Cache SonarCloud dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonarcloud-${{ hashFiles('**/*.java') }}
+        restore-keys: |
+          ${{ runner.os }}-sonarcloud-
+
+    - name: Run SonarCloud Scanner
+      uses: sonarsource/sonarcloud-github-action@v1
+      with:
+        organization: vaishnavikolavasi18  # Replace with your SonarCloud organization key
+        projectKey: VaishnaviKolavasi_PythonProject  # Replace with your SonarCloud project key
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Make sure you have SONAR_TOKEN in your GitHub secrets
