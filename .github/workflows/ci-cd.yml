@@ -1,29 +1,44 @@
-name: Python CI with SonarCloud
+name: SonarCloud Scan
 
 on:
   push:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 jobs:
-  build:
-    name: Build and analyze
+  sonarcloud:
+    name: SonarCloud Scan
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.10'
+        python-version: '3.8'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run tests
-      run: |
-        pytest
+        pip install flask sqlite3
+
+    - name: Cache SonarCloud dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonarcloud-${{ hashFiles('**/*.py') }}
+        restore-keys: |
+          ${{ runner.os }}-sonarcloud-
+
+    - name: Run SonarCloud Scanner
+      uses: sonarsource/sonarcloud-github-action@v1
+      with:
+        organization: vaishnavikolavasi18  # Replace with your SonarCloud organization key
+        projectKey: VaishnaviKolavasi_PythonProject     # Replace with your project key
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Add your SonarCloud token to GitHub Secrets
