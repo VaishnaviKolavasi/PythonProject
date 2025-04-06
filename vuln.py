@@ -1,47 +1,75 @@
-from flask import Flask, request, send_file
+# app.py
+from flask import Flask, request, make_response, render_template_string
 import os
 import sqlite3
+import subprocess
+import pickle
 
 app = Flask(__name__)
 
-# --- Setup (for SQL Injection demo) ---
-DATABASE = 'users.db'
+# VULN 1: Hardcoded credentials
+USERNAME = "admin"
+PASSWORD = "password123"
 
-def init_db():
-    conn = sqlite3.connect(DATABASE)
-    c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)')
-    c.execute("INSERT INTO users (username, password) VALUES ('admin', 'secret')")
-    conn.commit()
-    conn.close()
-
-# --- Vulnerable route: Directory Traversal ---
-@app.route('/download')
-def download():
-    filename = request.args.get('file')  # e.g., ../../etc/passwd
-    return send_file(os.path.join('files', filename))
-
-# --- Vulnerable route: Command Injection ---
-@app.route('/ping')
-def ping():
-    host = request.args.get('host')  # e.g., 127.0.0.1; ls
-    return os.popen(f"ping -c 1 {host}").read()
-
-# --- Vulnerable route: SQL Injection ---
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    conn = sqlite3.connect(DATABASE)
-    c = conn.cursor()
-    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
-    result = c.execute(query).fetchone()
-    conn.close()
-    if result:
-        return "Logged in!"
-    else:
-        return "Invalid credentials."
+    # VULN 2: Insecure password comparison
+    if request.form['username'] == USERNAME and request.form['password'] == PASSWORD:
+        return "Logged in"
+    return "Invalid credentials"
 
-if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+@app.route('/rce')
+def rce():
+    # VULN 3: Remote Code Execution via unsanitized input to subprocess
+    cmd = request.args.get('cmd')
+    return subprocess.getoutput(cmd)
+
+@app.route('/xss')
+def xss():
+    # VULN 4: Reflected XSS
+    name = request.args.get('name')
+    return render_template_string("<h1>Hello " + name + "</h1>")
+
+@app.route('/ssrf')
+def ssrf():
+    # VULN 5: SSRF via open URL from user input
+    import requests
+    url = request.args.get('url')
+    r = requests.get(url)
+    return r.text
+
+@app.route('/file_read')
+def file_read():
+    # VULN 6: Directory traversal
+    filename = request.args.get('file')
+    with open("files/" + filename, 'r') as f:
+        return f.read()
+
+@app.route('/cookie')
+def cookie():
+    # VULN 7: Missing HttpOnly flag
+    resp = make_response("Setting insecure cookie")
+    resp.set_cookie("session", "abc123")  # No HttpOnly, No Secure
+    return resp
+
+@app.route('/pickle')
+def pickle_vuln():
+    # VULN 8: Unsafe deserialization
+    data = request.args.get('data')
+    obj = pickle.loads(bytes.fromhex(data))
+    return str(obj)
+
+@app.route('/sql')
+def sql_injection():
+    # VULN 9: SQL Injection
+    name = request.args.get('name')
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    query = f"SELECT * FROM users WHERE name = '{name}'"
+    c.execute(query)
+    return str(c.fetchall())
+
+@app.route('/debug')
+def debug():
+    # VULN 10: Debug mode exposed
+    return app.run(debug=True)
