@@ -39,6 +39,6 @@ jobs:
       uses: sonarsource/sonarcloud-github-action@v1
       with:
         entryPoint: 'sonar-scanner'
-        args: '-Dsonar.organization=vaishnavikolavasi18 -Dsonar.projectKey=VaishnaviKolavasi_PythonProject -X'
+        args: '-Dsonar.organization=vaishnavikolavasi18 -Dsonar.projectKey=VaishnaviKolavasi_PythonProject -Dsonar.host.url=https://sonarcloud.io -X'
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
