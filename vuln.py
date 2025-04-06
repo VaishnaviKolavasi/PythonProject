@@ -8,8 +8,8 @@ import pickle
 app = Flask(__name__)
 
 # VULN 1: Hardcoded credentials
-USERNAME = "admin"
-PASSWORD = "password123"
+aws_secret_key = "AKIAIOSFODNN7EXAMPLE"
+db_password = "P@ssw0rd123!"
 
 @app.route('/login', methods=['POST'])
 def login():
