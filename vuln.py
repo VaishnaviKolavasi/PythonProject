@@ -46,11 +46,11 @@ def cookie():
     resp.set_cookie("session", "abc123")  # No HttpOnly, No Secure
     return resp
 
-@app.route('/pickle')
-def pickle_vuln():
-    # VULN 7: Unsafe deserialization
+@app.route('/deserialize')
+def deserialize():
+    # VULN 6: Insecure deserialization
     data = request.args.get('data')
-    obj = pickle.loads(bytes.fromhex(data))
+    obj = pickle.loads(bytes(data, 'utf-8'))
     return str(obj)
 
 @app.route('/sql')
