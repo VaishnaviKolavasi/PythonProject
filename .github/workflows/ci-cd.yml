@@ -27,11 +27,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install flask
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v2
-      with:
-        java-version: '17'
-
     - name: Cache SonarCloud dependencies
       uses: actions/cache@v3
       with:
@@ -44,6 +39,6 @@ jobs:
       uses: sonarsource/sonarcloud-github-action@v1
       with:
         entryPoint: 'sonar-scanner'
-        args: '-Dsonar.organization=your-sonarcloud-organization -Dsonar.projectKey=vulnerable-python-app-sast'
+        args: '-Dsonar.organization=vaishnavikolavasi18 -Dsonar.projectKey=VaishnaviKolavasi_PythonProject'
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
