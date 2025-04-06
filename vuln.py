@@ -73,3 +73,9 @@ def sql_injection():
 def debug():
     # VULN 10: Debug mode exposed
     return app.run(debug=True)
+
+@app.route('/eval')
+def eval_vuln():
+    # VULN 11: Arbitrary code execution via eval
+    code = request.args.get('code')
+    return str(eval(code))
