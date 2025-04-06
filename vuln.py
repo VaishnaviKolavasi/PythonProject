@@ -32,9 +32,9 @@ def xss():
 
 @app.route('/ssrf')
 def ssrf():
-    # VULN 5: SSRF via open URL from user input
+    # VULN 5: SSRF - User controls the URL being fetched by the server
     import requests
-    url = request.args.get('url')
+    url = request.args.get('url')  # e.g., ?url=http://localhost:5000/admin
     r = requests.get(url)
     return r.text
 
