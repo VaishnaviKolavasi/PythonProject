@@ -22,7 +22,7 @@ SONAR_HOST_URL: URL of your SonarQube instance
 
 #### Run It Locally
 
-$ git clone https://github.com/your-username/PythonProject.git
+$ git clone https://github.com/VaishnaviKolavasi/PythonProject.git
 $ cd PythonProject
 $ python vuln_code.py
 
